@@ -1,0 +1,50 @@
+<html>
+    <head>
+        <title>Movie Masala</title>
+        <script src="/scripts/jquery.js"></script>
+        <link rel="stylesheet" href="/styles/bootstrap.css">
+    </head>
+
+    <body>
+        <form class="container text-center col-3">
+            <div class="row">
+                <input class="form-control" id="email" placeholder="enter email"/>
+            </div>
+            <div class="row align-middle">
+                <input class="form-control" id="password" placeholder="enter password"/>
+            </div> <br>
+            <button class="row align-middle btn btn-primary" id="login" type="button"> Login </button>
+        </form>
+    </body>
+
+    <script>
+        $("#login").click(function(event) {
+            const email = $("#email").val();
+            const password = $("#password").val();
+
+            const body = {
+                email: email,
+                password: password
+            };
+
+            $.ajax({
+                type: "POST",
+                url: "/user/login",
+                data: JSON.stringify(body),
+                success: success,
+                dataType: "json",
+                contentType: "application/json"
+            });
+        });
+
+        const success = function(data) {
+            if (data === ""){
+                window.alert("Wrong credentials!");
+            } else {
+                localStorage.setItem("email", data.email);
+                window.location = "/your-movies.html";
+            }
+        };
+
+    </script>
+</html>

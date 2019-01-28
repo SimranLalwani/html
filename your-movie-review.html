@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your movies</title>
+    <script src="/scripts/jquery.js"></script>
+    <link rel="stylesheet" href="/styles/bootstrap.css">
+</head>
+<body>
+    <div class="container text-center col-9">
+    <div class="row list-group">
+    </div>  <br>
+    <div class="row align-middle">
+            <input class="form-control" id="rating" placeholder="enter rating 1-5"/>
+            <input class="form-control" id="comment" placeholder="enter your comment"/>
+        </div> <br>
+
+    <button class="row align-middle btn btn-primary" id="addReview" type="button"> Add Review </button>  
+    </div>
+</body>
+<script>
+    let movieName = '';
+    $(document).ready(function() {
+        movieName = new URL(window.location).searchParams.get("movieName");
+        const url = "/review/review?name=" + movieName;
+        $.ajax({
+            type: "GET",
+            url: url,
+            success: success,
+            dataType: "json"
+        });
+    });
+
+    const success = function(data) {
+        let html = "";
+        data.reviews.forEach(function(review) {
+            html += getReviewListItem(review);
+        });
+
+        $('.list-group').html(html);
+    };
+    const getReviewListItem = function(review) {
+        return '<a href="#" class="list-group-item list-group-item-action">' +
+            '<div class="d-flex w-100 justify-content-between">' +
+                '<p class="mb-1">' + review.comment + '</p>' +
+                '<small> Rating: '+ review.rating + '/5</small>' +
+            '</div> </a>';
+    }
+
+    $("#addReview").click(function(event) {
+            const rating = $("#rating").val();
+            const comment = $("#comment").val();
+
+            const body = {
+                movieName: movieName,
+                rating: parseInt(rating),
+                comment: comment
+            };
+            $.ajax({
+                type: "POST",
+                url: "/review/review",
+                data: JSON.stringify(body),
+                success: function(){ 
+                    window.location.reload();
+                },
+                dataType: "json",
+                contentType: "application/json"
+            });
+        });
+</script>
+</html>

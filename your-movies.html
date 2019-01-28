@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your movies</title>
+    <script src="/scripts/jquery.js"></script>
+    <link rel="stylesheet" href="/styles/bootstrap.css">
+</head>
+<body>
+    <div class="container col-11">
+        <div class="list-group">
+        </div> <br>
+        <br>
+        <div class="row align-middle">
+            <input class="form-control" id="name" placeholder="Enter Name"/>
+            <input class="form-control" id="releaseDate" placeholder="Enter the release date"/>
+            <input class="form-control" id="genre" placeholder="Enter the Genre"/>
+            <input class="form-control" id="coverImageUrl" placeholder="Enter the cover image url"/>
+            <input class="form-control" id="actors" placeholder="Enter the Actors"/>
+            <input class="form-control" id="director" placeholder="Enter the Director"/>
+        </div> <br>
+
+        <div class="row">
+            <button class="col btn btn-primary" id="addMovie" type="button"> Add Movie </button> &nbsp; &nbsp;
+            <button class="col btn btn-secondary" id="editMovie" type="button"> Edit Movie </button> &nbsp; &nbsp;
+            <button class="col btn btn-danger" id="delMovie" type="button"> Delete Movie </button>
+        </div>
+
+        <br>
+
+    </div>
+    <br>
+</body>
+<script>
+    $(document).ready(function() {
+        const email = localStorage.getItem("email");
+        const url = "/movie/movie?email=" + email;
+        $.ajax({
+            type: "GET",
+            url: url,
+            success: success,
+            dataType: "json"
+        });
+    })
+
+    const success = function(data) {
+        let html = "";
+        data.movies.forEach(function(movie) {
+            html += getMovieListItem(movie);
+        });
+
+        $('.list-group').html(html);
+    };
+
+    const getMovieListItem = function(movie) {
+        const date = new Date(movie.releaseDate);
+        const dateStr = (date.getDate() + 1) + "-" + (date.getMonth() + 1) + "-" + date.getFullYear()
+        return '<a href="/your-movie-review.html?movieName=' + movie.name + '" class="list-group-item list-group-item-action">' +
+            '<div class="d-flex w-100 justify-content-between">' +
+                '<h5 class="mb-1">' + movie.name + '</h5>' +
+                '<small>' + dateStr + '</small>' +
+            '</div>' +
+            '<p class="mb-1"> Actors: ' + movie.actors.reduce((prev, curr) => { return prev + curr.name + ", "}, "").slice(0, -2) + '</p>' +
+            '<p class="mb-<1"> Director: ' + movie.director.name + '</p>' +
+            '<div class="d-flex w-100 justify-content-between">' +
+                '<div>' + 
+                    '<small> Genre: ' + movie.genre + '</small><br>' +
+                    '<small> Link: ' + movie.coverImageUrl + '</small><br>' +
+                '</div>' +
+            '</div>' + 
+        '</a>';
+    }
+
+    $("#addMovie").click(function(event) {
+        const name = $("#name").val();
+        const genre = $("#genre").val();
+        const releaseDate = $("#releaseDate").val();
+        const coverImageUrl = $("#coverImageUrl").val();
+        const actors = $("#actors").val().split(",").reduce((acc, curr) => {
+            acc.push({
+                name: curr
+            });
+            return acc;
+        }, []);
+        const director = {
+            name: $("#director").val()
+        };
+        const email = localStorage.getItem("email");
+
+        const body = {
+            email: email,
+            movie: {
+                name: name,
+                genre: genre,
+                releaseDate: releaseDate,
+                coverImageUrl: coverImageUrl,
+                actors: actors,
+                director: director
+            }
+        };
+
+        $.ajax({
+            type: "POST",
+            url: "/movie/movie",
+            data: JSON.stringify(body),
+            success: function(){ 
+                window.location.reload();
+            },
+            dataType: "json",
+            contentType: "application/json"
+        });
+    });
+
+    $("#editMovie").click(function(event) {
+        const name = $("#name").val();
+        const genre = $("#genre").val();
+        const releaseDate = $("#releaseDate").val();
+        const coverImageUrl = $("#coverImageUrl").val();
+        const actors = $("#actors").val().split(",").reduce((acc, curr) => {
+            acc.push({
+                name: curr
+            });
+            return acc;
+        }, []);
+        const director = {
+            name: $("#director").val()
+        };
+        const email = localStorage.getItem("email");
+
+        const body = {
+            email: email,
+            movie: {
+                name: name,
+                genre: genre,
+                coverImageUrl: coverImageUrl,
+                releaseDate: releaseDate,
+                actors: actors,
+                director: director
+            }
+        };
+
+        $.ajax({
+            type: "PUT",
+            url: "/movie/movie",
+            data: JSON.stringify(body),
+            success: function(){ 
+                window.location.reload();
+            },
+            dataType: "json",
+            contentType: "application/json"
+        });
+    });
+
+    $("#delMovie").click(function(event) {
+        const name = $("#name").val();
+        const email = localStorage.getItem("email");
+        const url = "/movie/movie?email=" + email + "&movie=" + name;
+        $.ajax({
+            type: "DELETE",
+            url: url,
+            success: function() {
+                window.location.reload();
+            },
+            dataType: "json"
+        });
+    });
+</script>
+</html>
